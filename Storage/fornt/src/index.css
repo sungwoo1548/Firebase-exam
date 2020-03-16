@@ -1,0 +1,15 @@
+body {
+    /* struct */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /* outlook */
+    min-height: 100vh;
+    margin: 0;
+    background-color: #333e53;
+    /* contents */
+    text-align: center;
+    font-size: calc(10px + 2vmin);
+    color: white;
+}

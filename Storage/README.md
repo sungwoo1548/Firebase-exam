@@ -25,14 +25,19 @@
 ### 3. Firebase
 
 1.  Firebase 접속 (구글아이디 사용)
+
 2.  프로젝트 생성
    <img src="https://user-images.githubusercontent.com/21153016/76598364-13a64000-6546-11ea-9483-203e1d175274.png" alt="image" style="zoom:50%;" />
-   - `+`버튼 눌러서 기본으로 생성 (나중에 각각 설정 가능)
+
+   * `+`버튼 눌러서 기본으로 생성 (나중에 각각 설정 가능)
      ( 프로젝트명 > 애널리틱스off > 생성)
+
 3. 프로젝트에서 앱 만들기
    <img src="https://user-images.githubusercontent.com/21153016/76606767-33456480-6556-11ea-8fa7-eaaaed4d6b39.png" alt="image" style="zoom:50%;" />
-   - 앱 이름 정하고(공개되지 않음, 나만 알아볼수 있으면 됨) 바로 `앱등록` 클릭
-   - 클릭하면 `Firebase SDK 추가` 가 나오는데, 지금은 무시
+
+   * 앱 이름 정하고(공개되지 않음, 나만 알아볼수 있으면 됨) 바로 `앱등록` 클릭
+
+   * 클릭하면 `Firebase SDK 추가` 가 나오는데, 지금은 무시
 
 
 
