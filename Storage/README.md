@@ -139,24 +139,147 @@
 
         마지막 줄에 hosting URL로 접속하면 내가 만든 사이트가 떠야함.
         
-2. firebase 사이트에서 확인하기
+     2. firebase 사이트에서 확인하기
      
-   ![image](https://user-images.githubusercontent.com/21153016/76747272-3b9ed900-67bc-11ea-94ab-c044b41edb63.png)
+        ![image](https://user-images.githubusercontent.com/21153016/76747272-3b9ed900-67bc-11ea-94ab-c044b41edb63.png)
      
-   hosting 탭을 보면 `프로젝트명.web.app` 과 `프로젝트명.firebaseapp.com` 이라는 2개의 주소가 생성되는데, 어느것을 써도 상관없음. 
+     3. hosting 탭을 보면 `프로젝트명.web.app` 과 `프로젝트명.firebaseapp.com` 이라는 2개의 주소가 생성되는데, 어느것을 써도 상관없음. 
         
      
-* ========= 5번 내용 이후는 Server 작업 후 진행 ==============
+     ========= 5번 내용부터는 Server 작업 후 진행 ==============
      
-5. Firebase SDK 적용 후 local test
+  5.  Firebase SDK 적용하기
   
-6. 배포하기
+     1. module 설치
+  
+        * > yarn add firebase
+  
+     2. `firebaseConfig` 가져오기
+  
+        ![image](https://user-images.githubusercontent.com/21153016/76936907-184c6900-6937-11ea-9729-9d0c1485224c.png)
+  
+        ![image](https://user-images.githubusercontent.com/21153016/76937028-4df15200-6937-11ea-909a-0e34c92127ef.png)
+  
+     3. 코드에 적용하기
+  
+        * 개발폴더/src/component/App.js
+  
+          ```jsx
+          // App.js
+          import React from 'react';
+          
+          // style
+          import './App.css'
+          
+          // firebase
+          import firebase from 'firebase';  // 모듈 불러오기
+          const firebaseConfig = {
+            apiKey: "AIzaSyB48vgNoCW2K26PlG_BWS4xuu2kWdBBt1U",
+            authDomain: "kick-storage-exam.firebaseapp.com",
+            databaseURL: "https://kick-storage-exam.firebaseio.com",
+            projectId: "kick-storage-exam",
+            storageBucket: "kick-storage-exam.appspot.com",
+            messagingSenderId: "596019196668",
+            appId: "1:596019196668:web:b7cb12fcfa32c2ffcc1d79",
+            measurementId: "G-R7XWD1WWZR"
+          };
+          firebase.initializeApp(firebaseConfig);  // firebase 초기화
+          
+          const App = () => {
+            return (
+              <div>
+                hello world!
+              </div>
+            )
+          }
+          
+          export default App
+          ```
+  
+          -> 초기화 후 firebase.(매서드) 사용할 수 있음
+  
+     4. Storage 참조 만들고 적용하기 (App.js 수정)
+  
+        ```jsx
+        import React, { useState } from 'react';    //요기 추가
+        
+        // style
+        import './App.css'
+        
+        // firebase
+        import firebase from 'firebase';
+        const firebaseConfig = {...};
+        firebase.initializeApp(firebaseConfig);
+        
+        const App = () => {
+          const [fileURL, setFileURL] = useState("");   //요기 추가 : img 태그에 쓸 src URL
+        
+          const fireStorage = firebase.storage();    //요기 추가 : storage 매서드
+          const StorageRef = fireStorage.ref();      //요기 추가 : bucket참조
+          const fileRef = StorageRef.child("brian.jpg");   //요기 추가 : file 참조
+        
+          fileRef.getDownloadURL().then(url => setFileURL(url)); //요기 추가 : 접근가능한 URL 생성 후 react state 업데이트 
+        
+          return (
+            <div>
+              hello world!
+              <img src={fileURL} />  {/* react state인 fileURL이 적용됨 */}
+            </div>
+          )
+        }
+        
+        export default App
+        ```
+  
+        -> 리액트에 대한 자세한 내용은... 다른 예제에서 다룰예정
+  
+        -> 여기서 포인트는 `fileRef`임 : front에서 file이름을 알고 있어야 한다는 것임, server를 통해 storage에 저장된 이미지 파일 이름을 어떻게 알 수 있는가? 라는 의문이 들겠지만, 지금은 그냥 알고 있다는 가정하에 진행. ( 해결 방법 => server에서 file upload 후 파일명을 db에 저장하고, front는 그 db를 참조하고 있다가 파일명을 가져오면됨.)
+  
+  6. local에서 실행해보기
+  
+     1. 명령창에서
+  
+        * > yarn start
+  
+          하면, react 개발용 서버가 자동으로 실행되면서 브라우저 까지 실행해줌.
+          (tip : node 서버에서 port를 3000으로 지정했는데, react 개발용 서버도 port가 3000이다. node서버를 먼저 가동하고, react에서 yarn start하면 port 3000 이 이미 사용중 이라고 다른 port사용할 거냐고 묻는다 여기서 y 하면 3001로 실행됨)
+  
+     2. 브라우저가 실행되면, `F12`를 눌러 개발자 모드를 활성화 해보자 (크롬기준)
+  
+        * 개발자 모드의 메뉴중 `Console`탭을 누르면 아래와 같이나옴
+  
+          ![image-20200318171800910](C:\Users\A1\AppData\Roaming\Typora\typora-user-images\image-20200318171800910.png)
+  
+          -> 이 문서를 보고 진행 했다면 에러가 뜰것 임
+              에러의 내용은 fornt가 Storage에 접근할 권한이 없다는 것임.
+  
+        * 에러 해결 = Storage 보안 규칙 수정
+  
+          ![image](https://user-images.githubusercontent.com/21153016/76940066-e76f3280-693c-11ea-8083-520497457b0a.png)
+  
+          ```
+          allow read, write: if request.auth != null;
+          ```
+  
+          를
+  
+          ```
+          allow read, write;
+          ```
+  
+          로 변경 후 `게시`를 누르면 됨
+  
+        * 10초 정도 후에 다시 브라우저 확인 (`F5`)
+  
+          ![image](https://user-images.githubusercontent.com/21153016/76940368-71b79680-693d-11ea-9a27-b6c45d1d7c5f.png)
+  
+          hello world와 밑에 그림, console에 에러가 사라진 것을 확인 할 수 있음.
 
 
 
 ### 2. Server - `Node JS`
 
-* `Server` 에서 Firebase SDK를 연결하는 방법은 2가지이다.
+* `Server` 에서 `Storage`에 접근 하는 방법은 2가지이다.
 
   1. `Firebase Admin SDK`사용 : 공식문서 - https://firebase.google.com/docs/admin/setup?authuser=0
   2. `Google Cloud Storage API`사용 : 공식문서 - https://googleapis.dev/nodejs/storage/latest
@@ -240,12 +363,14 @@
        const BUCKET = admin.storage().bucket();  // storage init 매서드
   
        module.exports = { BUCKET }; // 이 BUCKET으로 필요할 때, storage 작업 할 거임
+       ```
      ```
      
+     ```
 3. upload router 구성
   
      * 개발폴더/router/`upload.js` 생성
-  
+    
        ```js
        // upload.js
        const express = require("express");
@@ -260,19 +385,21 @@
            */
        });
        
-     module.exports = router;
        ```
      
-     * 개발폴터/index.js 수정
+     module.exports = router;
+       ```
 
+     * 개발폴터/index.js 수정
+     
        ```js
        // index.js
        ...
        // middle-ware
        app.use("/",require("./router/main"));
        app.use("/upload",require("./router/upload")); // 여기 추가
-       ...
-       ```
+    ...
+    ```
   
   4. 이미지 업로드 시나리오
   
@@ -282,9 +409,9 @@
   5. multer 설치 후 코드 적용
   
      * > npm i multer
-  
+    
      * upload.js 수정
-  
+    
        ```js
        // upload.js
        const express = require("express");
@@ -313,17 +440,17 @@
        
        module.exports = router;
        ```
-  
+    
        -> multer의 자세한 내용은 [여기](https://github.com/expressjs/multer/blob/master/doc/README-ko.md)에서 확인 
   
   6. multer 에서 읽은 파일 storage로 저장하기
   
      * 위에서 `file_list`에 업로드 된 file 정보가 배열로 들어 있음.
        이 예제에서는 1개의 이미지 파일을 업로드 할 것임으로 업로드한 이미지는 `file_list[0]`에 들어있음
-  
+    
      * `Firebase`코드 적용
        -> Firebase Admin SDK를 사용하여 BUCKET 매서드를 참조하면 `Google Cloud Storage Client Library` 규칙을 사용하여 작업을 처리할 수 있음 ([링크](https://googleapis.dev/nodejs/storage/latest/))
-  
+    
        ```js
        // upload.js
        ...
@@ -355,14 +482,32 @@
        });
        ...
        ```
-  
+    
        -> `BUCKET`의 매서드인 `file`을 통해 파일명을 정하고, `file`의 매서드인 `save`를 통해 저장하면됨 `save`에 인자로 들어가야할 data는 버퍼값을 넣으면 됨. `save(data[=buffer])`
        자세한 내용은 [여기](https://googleapis.dev/nodejs/storage/latest/File.html#save) 참고 (Bucket.file().save() 에 관한 내용)
   
-  7. 저장결과 확인하기
+  7. postman으로 file 보내기
   
+       1. Headers 설정
+  
+          ![image](https://user-images.githubusercontent.com/21153016/76940770-2d78c600-693e-11ea-9862-632187d76927.png)
+  
+          -> Method : POST , URL : http://localhost:3000, Headers : Content-Type : multipart/form-data
+     
+     2. Body 설정
+     
+          ![image](https://user-images.githubusercontent.com/21153016/76940701-120dbb00-693e-11ea-8a0f-a48393eebebe.png)
+     
+          -> drop-box에서 form-data선택 후, Key 영역에 마우스 올리면 file/text선택 옵션이 나오는데 file 선택하면 VALUE영역에 `Select Files` 기능이 생김
+     
+     3. file선택 후 Send 버튼 누르면 됨
+     
+          ![image](https://user-images.githubusercontent.com/21153016/76941088-c0196500-693e-11ea-87a8-030471264e61.png)
+     
+  8. 저장결과 확인하기
+
      * `Firebase` 사이트에 접속 하여 `Storage` 를 눌러보면 새로운 파일이 업로드 된것을 확인할 수 있다.
-  
+       
        ![image](https://user-images.githubusercontent.com/21153016/76933233-04513900-6930-11ea-9ff2-9b795782e98e.png)
-  
+       
        
