@@ -1,10 +1,13 @@
 const admin = require("firebase-admin");
 
-const serviceAccount = require("path/to/serviceAccountKey.json");
+const serviceAccount = require("./serviceAccountKey.json");
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://kick-storage-exam.firebaseio.com"
+    // databaseURL: "",
+    storageBucket: "kick-storage-exam.appspot.com"
 });
 
-module.exports = admin;
+const BUCKET = admin.storage().bucket();
+
+module.exports = { BUCKET };
