@@ -274,6 +274,14 @@
           ![image](https://user-images.githubusercontent.com/21153016/76940368-71b79680-693d-11ea-9a27-b6c45d1d7c5f.png)
   
           hello world와 밑에 그림, console에 에러가 사라진 것을 확인 할 수 있음.
+  
+  7.  다시 배포하기
+  
+     1. > yarn build
+  
+     2. > firebase deploy
+  
+     3. https://`프로젝트명.web.app`  접속해서 이미지 보이는지 확인
 
 
 
