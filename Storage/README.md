@@ -45,7 +45,7 @@
 
 ### 1. Firebase SDK for `Front`
 
-공식문서 : https://firebase.google.com/docs/web/setup?authuser=0
+[공식 참고 문서]: https://firebase.google.com/docs/web/setup?authuser=0	"자바스크립트 프로젝트에 Firebase 추가"
 
 * `Front` 에서 Firebase SDK를 연결하는 방법은 크게 4가지가 있다.
 
@@ -139,230 +139,22 @@
 
         마지막 줄에 hosting URL로 접속하면 내가 만든 사이트가 떠야함.
         
-2. firebase 사이트에서 확인하기
-     
-   ![image](https://user-images.githubusercontent.com/21153016/76747272-3b9ed900-67bc-11ea-94ab-c044b41edb63.png)
-     
-   hosting 탭을 보면 `프로젝트명.web.app` 과 `프로젝트명.firebaseapp.com` 이라는 2개의 주소가 생성되는데, 어느것을 써도 상관없음. 
+
+     2. firebase 사이트에서 확인하기
+
+        ![image](https://user-images.githubusercontent.com/21153016/76747272-3b9ed900-67bc-11ea-94ab-c044b41edb63.png)
+
+        hosting 탭을 보면 `프로젝트명.web.app` 과 `프로젝트명.firebaseapp.com` 이라는 2개의 주소가 생성되는데, 어느것을 써도 상관없음. 
         
-     
-* ========= 5번 내용 이후는 Server 작업 후 진행 ==============
-     
-5. Firebase SDK 적용 후 local test
-  
-6. 배포하기
+
+     * ========= 5번 내용 이후는 Server 작업 후 진행 ==============
+
+  5. Firebase SDK 적용 후 local test
+
+  6. 배포하기
 
 
 
 ### 2. Server - `Node JS`
 
-* `Server` 에서 Firebase SDK를 연결하는 방법은 2가지이다.
-
-  1. `Firebase Admin SDK`사용 : 공식문서 - https://firebase.google.com/docs/admin/setup?authuser=0
-  2. `Google Cloud Storage API`사용 : 공식문서 - https://googleapis.dev/nodejs/storage/latest
-
-* `Firebase Cloud Storage`는 `Firebase`와 `Google Cloud Platform`이 같은 `Bucket`을 참조하는데, 
-  서버에서 `Firebase`의 다른기능들을 이용하려면 1번 방법, 서버가 `Cloud Storage`만 이용하면 2번 방법을 사용하면 된다.
-
-* 나는 나중에 `Firebase` 다른 기능들을 이용할 것을 고려하여 `1번 방법`을 사용함
-
-  1. `Firebase Admin SDK` 의 `새 비공개 키 생성` (클릭하면 json 파일 자동 다운로드됨)
-     ![image](https://user-images.githubusercontent.com/21153016/76815189-4dc25b00-6840-11ea-9ce4-c8e0ad3abf05.png)
-     -> tip : 오른쪽 상단에 서비스계정관리를 이용하면 용도에 따라 권한이 다른 비공개 키를 생성 할 수 있다.
-     -> tip : git을 사용하고 비공개 키 파일을 프로젝트폴더 안에 추가 한다면, 비공개 키 파일을 `.gitignore`에 추가하자!
-
-  2. `Firebase Admin SDK`  구성 스니펫 코드에 추가
-     ![image](https://user-images.githubusercontent.com/21153016/76815437-f96bab00-6840-11ea-84af-d7f709f54ec8.png)
-
-     * 1행을 보자 
-
-       ```js
-       var admin = require("firebase-admin")
-       ```
-
-       > npm i firebase-admin
-
-       -> firebase-admin 설치필요
-
-     * 3행을 보자
-
-       ```js
-       var serviceAccount = require("path/to/serviceAccountKey.json")
-       ```
-
-       `serviceAccountkey.json` : 위에서 다운로드한 비공개키 파일
-
-       `path/to` : 다운로드한 경로 
-
-     * 마지막 행
-
-       ```js
-       admin.initializeApp({
-         credential: admin.credential.cert(serviceAccount),
-         databaseURL: "https://kick-storage-exam.firebaseio.com"
-       });
-       ```
-
-       `admin.initializeApp` : server 구동시 `initializeApp` method를 통해 `"내가 Admin 이다!"` 를 인증함.
-
-       `credential` : 다운로드한 비공개 키로부터 Admin 인증에 필요한 정보를 가져옴.
-
-       `databaeURL` : 자동으로 작성되는 내용인데, 이번 예제에서는 Storage를 사용함으로 주석처리 해도 됨.
-
-       *`storageBucket` : Storage를 이용하기 위해 추가해야함.  Firebase 사이트에서 왼쪽메뉴중 Storage선택하면 gs://<BUCKET_NAME>.appspot.com 이라는 주소가 나옴.
-
-       입력할 때는 gs://를 빼고 아래와 같이 입력하면 됨.
-
-       ```js
-       admin.initializeApp({
-         credential: admin.credential.cert(serviceAccount),
-         // databaseURL: "",
-         storageBucket : <BUCKET_NAME>.appspot.com
-       });
-       ```
-
-     * sever 개발 코드에 추가하기
-
-       개발폴더/`firebaseAdmin.js `생성
-
-       ```js
-       // firebaseAdmin.js
-       const admin = require("firebase-admin");
-       
-       const serviceAccount = require("path/to/serviceAccountKey.json");
-       
-       admin.initializeApp({
-           credential: admin.credential.cert(serviceAccount),
-           //databaseURL: "",
-           storageBucket : <BUCKET_NAME>.appspot.com
-       });
-       
-       const BUCKET = admin.storage().bucket();  // storage init 매서드
-  
-       module.exports = { BUCKET }; // 이 BUCKET으로 필요할 때, storage 작업 할 거임
-     ```
-     
-3. upload router 구성
-  
-     * 개발폴더/router/`upload.js` 생성
-  
-       ```js
-       // upload.js
-       const express = require("express");
-       const router = express.Router();
-       
-       const BUCKET = require("../firebaseAdmin")
-       
-       router.post("/image", (req, res) => {
-           /*
-           localhost:3000/upload/image 로 요청된 이미지를
-           Storage로 업로드하는 작업
-           */
-       });
-       
-     module.exports = router;
-       ```
-     
-     * 개발폴터/index.js 수정
-
-       ```js
-       // index.js
-       ...
-       // middle-ware
-       app.use("/",require("./router/main"));
-       app.use("/upload",require("./router/upload")); // 여기 추가
-       ...
-       ```
-  
-  4. 이미지 업로드 시나리오
-  
-     * PC에서 `Server`로 [Postman 프로그램]( https://www.postman.com) 이용해서 content/type : multipart/formdata로 전송 할 거임
-     * `Server`에서는 [multer](https://github.com/expressjs/multer/blob/master/doc/README-ko.md)라는 모듈 사용해서 업로드된 파일을 읽을 것임
-  
-  5. multer 설치 후 코드 적용
-  
-     * > npm i multer
-  
-     * upload.js 수정
-  
-       ```js
-       // upload.js
-       const express = require("express");
-       const router = express.Router();
-       
-       const multer = require("multer"); // multer 모듈 불러오기
-       const upload = multer({ storage: multer.memoryStorage() }).any(); // multer 설정
-       
-       const BUCKET = require("../firebaseAdmin")
-       
-       router.post("/image", (req, res) => {
-           upload(req, res, (err) => { // req,res를 multer로 전달
-               if (err instanceof multer.MulterError) {
-                   // A Multer error occurred when uploading.
-               } else if (err) {
-                   // An unknown error occurred when uploading.
-               }
-       
-               // read file
-               const file_list = req.files;  // req.files에 정보 담김
-               console.log("file_list : ", file_list);   // termial에서 file 구조 확인.
-               
-               res.status(200).json({ file: file_list });
-           });
-       });
-       
-       module.exports = router;
-       ```
-  
-       -> multer의 자세한 내용은 [여기](https://github.com/expressjs/multer/blob/master/doc/README-ko.md)에서 확인 
-  
-  6. multer 에서 읽은 파일 storage로 저장하기
-  
-     * 위에서 `file_list`에 업로드 된 file 정보가 배열로 들어 있음.
-       이 예제에서는 1개의 이미지 파일을 업로드 할 것임으로 업로드한 이미지는 `file_list[0]`에 들어있음
-  
-     * `Firebase`코드 적용
-       -> Firebase Admin SDK를 사용하여 BUCKET 매서드를 참조하면 `Google Cloud Storage Client Library` 규칙을 사용하여 작업을 처리할 수 있음 ([링크](https://googleapis.dev/nodejs/storage/latest/))
-  
-       ```js
-       // upload.js
-       ...
-       router.post("/image", (req, res) => {
-           upload(req, res, (err) => { // req,res를 multer로 전달
-               ...
-       
-               // read file
-               const file_list = req.files;  // req.files에 정보 담김
-               console.log("file_list : ", file_list);   // termial에서 file 구조 확인.
-       
-               if (file_list.length === 0) {
-                   res.status(400).json({ error: "no file" });
-                   return;
-               }
-       
-               // firebase storage
-               const file_to_up = BUCKET.file(file_list[0].originalname); // file 매서드로 file이름 지정
-               file_to_up.save(file_list[0].buffer)
-                   .then(() => {
-                       res.status(200).json({ msg: "file uploaded" });
-                       return;
-                   })
-                   .catch(err => {
-                       res.status(500).json({ error: err.toString() });
-                       return;
-                   });
-           });
-       });
-       ...
-       ```
-  
-       -> `BUCKET`의 매서드인 `file`을 통해 파일명을 정하고, `file`의 매서드인 `save`를 통해 저장하면됨 `save`에 인자로 들어가야할 data는 버퍼값을 넣으면 됨. `save(data[=buffer])`
-       자세한 내용은 [여기](https://googleapis.dev/nodejs/storage/latest/File.html#save) 참고 (Bucket.file().save() 에 관한 내용)
-  
-  7. 저장결과 확인하기
-  
-     * `Firebase` 사이트에 접속 하여 `Storage` 를 눌러보면 새로운 파일이 업로드 된것을 확인할 수 있다.
-  
-       ![image](https://user-images.githubusercontent.com/21153016/76933233-04513900-6930-11ea-9ff2-9b795782e98e.png)
-  
-       
+1. <img src="https://user-images.githubusercontent.com/21153016/76597822-b8278280-6544-11ea-8eac-de647c013183.png" alt="image"  />

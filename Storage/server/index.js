@@ -6,7 +6,6 @@ app.use(express.json());
 
 // middle-ware
 app.use("/",require("./router/main"));
-app.use("/upload",require("./router/upload"));
 
 // server
 const PORT = process.env.PORT || 3000;
